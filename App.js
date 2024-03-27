@@ -9,11 +9,15 @@ import {
   TextInputBase,
   View,
   FlatList,
+  SafeAreaView,
 } from "react-native";
+import GoalItem from "./components/GoalItem";
+import InputContainer from "./components/InputContainer";
 
 export default function App() {
   const [goal, setGoal] = useState("");
   const [enteredGoals, setEnteredGoals] = useState([]);
+  const [modalVisible, setModal] = useState(false);
   function goalInputHandler(text) {
     setGoal(text);
   }
@@ -22,18 +26,29 @@ export default function App() {
       ...enteredGoals,
       { text: goal, id: Math.random().toString() },
     ]);
+    setModal(false);
+  }
+  function openModal() {
+    setModal(!modalVisible);
+  }
+  function deleteGoalHandler(id) {
+    console.log("delete");
+    setEnteredGoals((enteredGoals) => {
+      return enteredGoals.filter((goal) => goal.id !== id);
+    });
   }
   return (
-    <View style={styles.appContainer}>
-      <View style={styles.inputContainer}>
-        <TextInput
-          placeholder="Your Course Goal"
-          style={styles.textInput}
-          textContentType="familyName"
-          onChangeText={goalInputHandler}
+    <SafeAreaView style={styles.appContainer}>
+      <Button title="Add new Goal" color={"#e08ce7"} onPress={openModal} />
+      {modalVisible && (
+        <InputContainer
+          addGoalHandler={addGoalHandler}
+          goalInputHandler={goalInputHandler}
+          modal={modalVisible}
+          openModal={openModal}
+          goal={goal}
         />
-        <Button title="Add Goals" onPress={addGoalHandler} />
-      </View>
+      )}
       <Text style={{ fontSize: 24 }}>List of Goals........</Text>
       <View style={styles.goalsContainer}>
         <FlatList
@@ -44,14 +59,15 @@ export default function App() {
           alwaysBounceVertical={true}
           renderItem={(item) => {
             return (
-              <View style={styles.goalsText}>
-                <Text style={{ color: "white" }}>{item.item.text}</Text>
-              </View>
+              <GoalItem
+                item={item.item}
+                deleteGoalHandler={deleteGoalHandler}
+              />
             );
           }}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
